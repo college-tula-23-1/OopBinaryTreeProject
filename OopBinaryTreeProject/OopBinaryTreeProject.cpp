@@ -24,5 +24,14 @@ int main()
     tree.InsertReq(270);
 
     tree.Print();
+    std::cout << "\n";
 
+    //auto node = tree.Find(70);
+    //auto node = tree.Find(100);
+    auto node = tree.Find(200);
+    tree.RemoveNode(node);
+
+    std::cout << "Root = " << tree.Root()->value << "\n";
+    tree.Print();
+    std::cout << "\n";
 }

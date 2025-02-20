@@ -7,6 +7,7 @@ class BinaryTree
 	struct Node
 	{
 		T value;
+	private:
 		Node<T>* parent = nullptr;
 		Node<T>* left = nullptr;
 		Node<T>* right = nullptr;
@@ -27,11 +28,14 @@ public:
 	void RemoveNode(Node<T>* node);
 	void RemoveBranch(Node<T>* node);
 
+	Node<T>* Find(T value);
+
 	Node<T>* Min(Node<T>* node = nullptr);
 	Node<T>* Max(Node<T>* node = nullptr);
 
 	int Count() const;
 	Node<T>* Root() const;
+	
 
 	bool Contains(T value);
 
@@ -123,6 +127,52 @@ inline void BinaryTree<T>::InsertReq(T value, Node<T>* node)
 }
 
 template<typename T>
+inline void BinaryTree<T>::RemoveNode(Node<T>* node)
+{
+	// delete leaf
+	if (!node->left && !node->right)
+	{
+		if (node == root)
+			root = nullptr;
+		else
+		{
+			if (node->parent->left == node)
+				node->parent->left = nullptr;
+			else
+				node->parent->right = nullptr;
+		}
+		delete node;
+		count--;
+		return;
+	}
+
+	// delete node with one child
+	if ((bool)node->left ^ (bool)node->right)
+	{
+		Node<T>* child;
+		child = (node->left) ? node->left : node->right;
+
+		if (node == root)
+			root = child;
+		else
+		{
+			if (node == node->parent->left)
+				node->parent->left = child;
+			else
+				node->parent->right = child;
+		}
+
+		delete node;
+		count--;
+		return;
+	}
+
+	Node<T>* nodeMinRight = Min(node->right);
+	node->value = nodeMinRight->value;
+	RemoveNode(nodeMinRight);
+}
+
+template<typename T>
 inline void BinaryTree<T>::RemoveBranch(Node<T>* node)
 {
 	if (node->left)
@@ -139,6 +189,46 @@ inline void BinaryTree<T>::RemoveBranch(Node<T>* node)
 	}
 
 	delete node;
+}
+
+template<typename T>
+inline BinaryTree<T>::Node<T>* BinaryTree<T>::Find(T value)
+{
+	Node<T>* node{ root };
+	while (node)
+	{
+		if (value == node->value)
+			break;
+		if (value < node->value)
+			node = node->left;
+		else
+			node = node->right;
+	}
+	return node;
+}
+
+template<typename T>
+inline BinaryTree<T>::Node<T>* BinaryTree<T>::Min(Node<T>* node)
+{
+	if (!node)
+		node = root;
+
+	while (node->left)
+		node = node->left;
+
+	return node;
+}
+
+template<typename T>
+inline BinaryTree<T>::Node<T>* BinaryTree<T>::Max(Node<T>* node)
+{
+	if (!node)
+		node = root;
+
+	while (node->right)
+		node = node->right;
+
+	return node;
 }
 
 template<typename T>
@@ -168,4 +258,11 @@ template<typename T>
 void BinaryTree<T>::Print()
 {
 	PrintBranch(root);
+}
+
+template<typename T>
+template<typename T>
+inline T BinaryTree<T>::Node<T>::Value()
+{
+	return value;
 }
