@@ -1,13 +1,22 @@
 #pragma once
 
 template <typename T>
+class IComparator
+{
+public:
+	virtual int Compare(T left, T right) = 0;
+	virtual int operator()(T left, T right) = 0;
+};
+
+
+template <typename T>
 class BinaryTree
 {
 	template <typename T>
 	struct Node
 	{
 		T value;
-	private:
+	//private:
 		Node<T>* parent = nullptr;
 		Node<T>* left = nullptr;
 		Node<T>* right = nullptr;
@@ -16,8 +25,15 @@ class BinaryTree
 	Node<T>* root;
 	int count;
 
+	IComparator<T>* comparator;
+
 public:
-	BinaryTree() : root{}, count{} {}
+	BinaryTree(IComparator<T>* comparator = nullptr)
+		: root{}, count{} 
+	{
+		if (comparator != nullptr)
+			this->comparator = comparator;
+	}
 	~BinaryTree();
 
 	Node<T>* CreateNode(Node<T>* parent, T value);
@@ -75,14 +91,16 @@ void BinaryTree<T>::InsertLoop(T value)
 	while (nodeCurrent)
 	{
 		nodeParent = nodeCurrent;
-		if (value < nodeCurrent->value)
+		/*if (value < nodeCurrent->value)*/
+		if(comparator->Compare(value, nodeCurrent->value) < 0)
 			nodeCurrent = nodeCurrent->left;
 		else
 			nodeCurrent = nodeCurrent->right;
 	}
 
 	nodeCurrent = CreateNode(nodeParent, value);
-	if (nodeCurrent->value < nodeParent->value)
+	/*if (nodeCurrent->value < nodeParent->value)*/
+	if(comparator->Compare(nodeCurrent->value, nodeParent->value) < 0)
 		nodeParent->left = nodeCurrent;
 	else
 		nodeParent->right = nodeCurrent;
@@ -103,7 +121,7 @@ inline void BinaryTree<T>::InsertReq(T value, Node<T>* node)
 	if (!node)
 		node = root;
 
-	if (value < node->value)
+	if ((*comparator)(value, node->value) < 0)
 	{
 		if (node->left)
 			InsertReq(value, node->left);
@@ -249,7 +267,7 @@ void BinaryTree<T>::PrintBranch(Node<T>* node)
 	if (node)
 	{
 		PrintBranch(node->left);
-		std::cout << node->value << " ";
+		std::cout << node->value << " " << "\n";
 		PrintBranch(node->right);
 	}
 }
@@ -260,9 +278,4 @@ void BinaryTree<T>::Print()
 	PrintBranch(root);
 }
 
-template<typename T>
-template<typename T>
-inline T BinaryTree<T>::Node<T>::Value()
-{
-	return value;
-}
+

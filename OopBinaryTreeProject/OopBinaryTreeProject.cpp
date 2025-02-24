@@ -1,37 +1,76 @@
 ﻿#include <iostream>
+#include <string>
 #include "BinaryTree.h"
+
+class User
+{
+    std::string name;
+    int age;
+public:
+    User(std::string name, int age)
+        : name{ name }, age{ age } {}
+    User() : User("", 0) {}
+
+    std::string& Name() { return name; }
+    int& Age() { return age; }
+
+    std::string ToString()
+    {
+        return "Name: " + name
+            + ", Age: " + std::to_string(age);
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const User& user)
+    {
+        out << "Name: " << user.name << ", Age: " << user.age;
+        return out;
+    }
+};
+
+class UserAgeComparator : public IComparator<User>
+{
+public:
+    int Compare(User user1, User user2) override
+    {
+        return user1.Age() - user2.Age();
+    }
+
+    int operator()(User user1, User user2) override
+    {
+        return user1.Age() - user2.Age();
+    }
+};
+
+class UserNameComparator : public IComparator<User>
+{
+public:
+    int Compare(User user1, User user2) override
+    {
+        return user1.Name().compare(user2.Name());
+    }
+
+    int operator()(User user1, User user2) override
+    {
+        return user1.Name().compare(user2.Name());
+    }
+};
+
+
+
+
+
+
+
 
 int main()
 {
-    BinaryTree<int> tree;
+    BinaryTree<User> tree(new UserNameComparator());
 
-    /*tree.InsertLoop(200);
-    tree.InsertLoop(100);
-    tree.InsertLoop(300);
-    tree.InsertLoop(50);
-    tree.InsertLoop(250);
-    tree.InsertLoop(350);
-    tree.InsertLoop(70);
-    tree.InsertLoop(270);*/
-
-    tree.InsertReq(200);
-    tree.InsertReq(100);
-    tree.InsertReq(300);
-    tree.InsertReq(50);
-    tree.InsertReq(250);
-    tree.InsertReq(350);
-    tree.InsertReq(70);
-    tree.InsertReq(270);
-
+    tree.InsertReq(*(new User("Sammy", 29)));
+    tree.InsertLoop(*(new User("Tommy", 19)));
+    tree.InsertReq(*(new User("Jimmy", 25)));
+    tree.InsertLoop(*(new User("Bobby", 30)));
     tree.Print();
-    std::cout << "\n";
 
-    //auto node = tree.Find(70);
-    //auto node = tree.Find(100);
-    auto node = tree.Find(200);
-    tree.RemoveNode(node);
 
-    std::cout << "Root = " << tree.Root()->value << "\n";
-    tree.Print();
-    std::cout << "\n";
 }
